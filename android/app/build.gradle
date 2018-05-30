@@ -11,6 +11,9 @@ import com.android.build.OutputFile
  * and their defaults. If you decide to add a configuration block, make sure to add it before the
  * `apply from: "../../node_modules/react-native/react.gradle"` line.
  *
+   project.ext.vectoricons = [
+     iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf' ] // Name of the font files you want to copy
+   ]
  * project.ext.react = [
  *   // the name of the generated asset file containing your JS bundle
  *   bundleAssetName: "index.android.bundle",
@@ -77,6 +80,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -137,6 +141,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-oauth')
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:23.0.1"
     compile "com.facebook.react:react-native:+"  // From node_modules
