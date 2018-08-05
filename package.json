@@ -1,36 +1,21 @@
 {
-  "name": "CSPPChatApp",
-  "version": "0.0.1",
+  "name": "empty-project-template",
+  "main": "node_modules/expo/AppEntry.js",
   "private": true,
   "scripts": {
-    "start": "node_modules/nodemon/bin/nodemon.js -- node_modules/babel-cli/bin/babel-node.js server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "eject": "expo eject"
   },
   "dependencies": {
-    "cookie-session": "^2.0.0-beta.3",
-    "express": "^4.16.3",
-    "passport": "^0.4.0",
-    "passport-facebook": "^2.1.1",
-    "passport-google-oauth20": "^1.0.0",
+    "expo": "^29.0.0",
+    "firebase": "^5.3.0",
+    "native-base": "^2.7.2",
     "react": "16.3.1",
-    "react-native": "0.55.4",
-    "react-native-elements": "^0.19.1",
-    "react-native-oauth": "^2.2.0",
-    "react-native-safari-view": "^2.1.0",
-    "react-native-vector-icons": "^4.6.0"
-  },
-  "devDependencies": {
-    "babel": "^6.23.0",
-    "babel-cli": "^6.26.0",
-    "babel-jest": "23.0.1",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react-native": "4.0.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "jest": "23.0.1",
-    "nodemon": "^1.17.5",
-    "react-test-renderer": "16.3.1"
-  },
-  "jest": {
-    "preset": "react-native"
+    "react-native": "https://github.com/expo/react-native/archive/sdk-29.0.0.tar.gz",
+    "react-native-google-signin": "^1.0.0-rc1",
+    "react-native-hr": "^1.1.4",
+    "react-native-hr-plus": "^1.0.6"
   }
 }

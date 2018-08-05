@@ -5,221 +5,315 @@ import {
   StyleSheet,
   Platform,
   Text,
-  View, Alert,
-  TouchableHighlight
+  View
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import OAuthManager from 'react-native-oauth';
 
-const manager = new OAuthManager('sadhan-sahitya')
-manager.configure({
-  google: {
-    client_id: '368494892603-0rlp169apn7r2sfaj42sag9054nb6fb1.apps.googleusercontent.com',
-    client_secret: 'ZinpYI91rqR45Alm4aoqfev1',
-    callback_url: `myapp://`
+import Expo from 'expo';
+
+import * as firebase from 'firebase';
+
+// import { GoogleSignin, GoogleSigninButton } from 'react-native-google-signin';
+
+
+//initialize Firebase
+const firebaseConfig = {
+
+    apiKey: "AIzaSyBwCZk-JT3oG-HwZs6_4AIm6KTJ37TR61A",
+    authDomain: "csca-test.firebaseapp.com",
+    databaseURL: "https://csca-test.firebaseio.com",
+    projectId: "csca-test",
+    storageBucket: "",
+};
+firebase.initializeApp(firebaseConfig);
+
+import { Container, Content, Header, Form, Input, Item, Button, Label } from 'native-base'
+
+export default class App extends React.
+Component {
+//constructor 
+  constructor(props){
+    super(props)
+
+    //these are the variables for login
+    // this.state = ({
+    //     email: '',
+    //     password: ''
+    // })
+    this.state = ({
+        signedIn: false,
+        user_data: undefined,
+        isValid: undefined,
+        email: '',
+        password: ''
+    })
   }
-});
+  
+signUpUsers = (email, password) => {
+    try {
+        if (this.state.password.length < 6) {
+            alert("Please enter atleast 6 characters")
+            return;
+          }
+          firebase.auth().createUserWithEmailAndPassword(email, password)
 
-export default class App extends Component {
+    } catch (error) {
+        console.log(error.toString())   
+    }
+  } 
 
-  handleLogin() {
-
-    manager.authorize('google', {scopes: 'email'})
-    .then(resp => console.log(resp))
-    .catch(err => console.log(err));
+  loginUser = (email, password) => {
+      try {
+        firebase.auth().signInWithEmailAndPassword(email,password).then(
+            jsonResponse => {
+                this.setState({
+                    user_data: jsonResponse
+                })
+            }
+        )
+      } catch (error) {
+          console.log(error.toString())
+      }
   }
-  handleLogout() {
-    manager.deauthorize('google');
-  }
+async loginWithFacebook(){
+    const {type, token} = await Expo.Facebook.logInWithReadPermissionsAsync
+    ('649369955436717', { permissions: ['public_profile', 'email', ]})
+
+    if(type == 'success'){
+        const credential = firebase.auth.FacebookAuthProvider.credential(token)
+        firebase.auth().signInAndRetrieveDataWithCredential(credential)
+        .then((user) =>{    
+            if(user.additionalUserInfo){
+                console.log("No additionalUserInfo Object returned")
+              } else {
+                console.log("additionalUserInfo Object returned, im Happy!", user.additionalUserInfo)
+              }
+        }).
+        catch( error => {
+            console.log(error)
+        })
+    
+    }
+}
+
+loginWithGoogle = async () => {
+    try {
+        const result = await Expo.Google.logInAsync({
+        androidClientId:
+            "767329949917-foc66elv192e7a5evih0cullemcvt95p.apps.googleusercontent.com",
+        iosClientId: "767329949917-0o2p19n5ig4nnrlkc922rf5gpqmbv0es.apps.googleusercontent.com",
+        scopes: ["profile", "email"]
+        })
+
+        if (result.type === "success") {
+            var temp_data = { email: result.email,
+                              name: result.user.name,
+                              photoURL: result.user.photoUrl
+                              };
+            this.setState({
+                user_data: temp_data
+        })
+        console.log(result)
+        } else {
+        console.log("cancelled")
+        }
+    } catch (e) {
+        console.log("error", e)
+    }
+}
+
+componentDidMount(){
+    firebase.auth().onAuthStateChanged( user => {
+        if(user != null){
+            var temp_data = {
+                email: user.displayName,
+                name: user.displayName,
+                photoURL: user.photoURL
+            }
+            this.setState({
+                user_data: temp_data,
+                isValid: true
+            })
+        }
+    })
+}
+
+signOutUser = async () => {
+    try {
+        await firebase.auth().signOut();
+        user_data: undefined;
+        isValid: undefined;
+        navigate('Auth');
+    } catch (e) {
+        console.log(e);
+    }
+this.setState({user_data: undefined, isValid: false});
+}
 
   render() {
-    manager.deauthorize('google');
+    const { user_data } = this.state;
+    const {isValid} = this.state;
+    console.log(isValid);
+
     return (
+        
+        <Container style={styles.container}>
+        <Text style={styles.header}>
+                Welcome to Nepal Sahitya {"\n"}
+        </Text>
+        { user_data? (
             <View style={styles.content}>
               <Text style={styles.header}>
-                hello world
-
+                Welcome {user_data.displayName} {"\n"}
               </Text>
-                      <View style={styles.buttons}>
+                  <View>
+                    {user_data.photoURL ? (
+                        <Image source={{ uri: user_data.photoURL }} style={styles.avatarImage} />
+                        
+                    ) : (
+                        <Text>{user_data.displayName}</Text>
+                    )}
+                    </View>    
 
-                        <Icon.Button
-                          name="google"
-                          backgroundColor="#DD4B39"
-                          onPress={this.handleLogin}
-                          {...iconStyles}
-                        >
-                          Login With Google
-                        </Icon.Button>
-
-                        <Icon.Button
-                          name="facebook"
-                          backgroundColor="#DD4B39"
-                          onPress={this.handleLogout}
-                          {...iconStyles}
-                        >
-                          Logout
-                        </Icon.Button>
-                      </View>
-                      <Text style={styles.header}>
-                        <Text>{this.resp.toString()} asdjf lk</Text>
-
-                      </Text>
+              
+            <Button style={styles.button}
+                full
+                rounded
+                Primary 
+                onPress={()=> this.signOutUser()}
+            >
+                <Text style={{color: 'white'}}>Logout, Go home kid!!  </Text>
+            </Button>
             </View>
-);}}
 
-// <Icon.Button
-//   name="facebook"
-//   backgroundColor="#3b5998"
-//   onPress={this.handleLogin}
-//   {...iconStyles}
-// >
-//   Login with Facebook
-// </Icon.Button>
+        )
+        :
+            (
+            <Form>
+                <Item floatingLabel>
+                    <Label>Email </Label>
+                    <Input
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                        onChangeText={(email)=>this.setState({email})}
+                    />
+                </Item>
+                <Item floatingLabel>
+                    <Label>Password </Label>
+                    <Input
+                        secureTextEntry={true}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                        onChangeText={(password)=>this.setState({password})}
+                    />
+                </Item>
 
-// <TouchableHighlight onPress={this.handleLogin}>
-//   <Text style={styles.header}>
-//       Login
-//   </Text>
-// </TouchableHighlight>
-//
-// <TouchableHighlight onPress={this.handleLogout}>
-//   <Text style={styles.header}>
-//       Logout
-//   </Text>
-// </TouchableHighlight>
+                <View style={styles.inline}>
+                    <Button style={styles.loginButton}
+                        full
+                        rounded
+                        success
+                        onPress ={()=> this.loginUser(this.state.email, this.state.password)} 
+                    >
+                        <Text style={{color: 'white'}}>Login </Text>
+                    </Button>
+                    <Button style={styles.loginButton}
+                        full
+                        rounded
+                        Primary 
+                        onPress={()=> this.signUpUsers(this.state.email, this.state.password)}
+                    >
+                        <Text style={{color: 'white'}}>SignUp</Text>
+                    </Button>
+                </View>
+                <View
+                    style={{
+                        marginTop: 100,
+                        borderBottomColor: 'black',
+                        borderBottomWidth: 1,
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                        margin: 20
+                    }}
+                />
+                <Button style={styles.button}
+                    full
+                    rounded
+                    Primary 
+                    onPress={()=> this.loginWithFacebook()}
+                >
+                    <Text style={{color: 'white'}}>Login With Facebook  </Text>
+                </Button>
 
+                <Button style={styles.button_google}
+                    full
+                    rounded
+                    Primary 
+                    onPress={()=> this.loginWithGoogle()}
+                >
+                    <Text style={{color: 'white'}}>Login With Google  </Text>
+                </Button>
+                {/* <GoogleSigninButton
+                    style={{ width: 48, height: 48 }}
+                    size={GoogleSigninButton.Size.Icon}
+                    color={GoogleSigninButton.Color.Dark}
+                    onPress={this._signIn}/>
+                 */}
 
-// export default class App extends Component {
-//
-//   state = {
-//     user: undefined, // user has not logged in yet
-//   };
-//
-//   // Set up Linking
-//   componentDidMount() {
-//     // Add event listener to handle OAuthLogin:// URLs
-//     Linking.addEventListener('url', this.handleOpenURL);
-//     // Launched from an external URL
-//     Linking.getInitialURL().then((url) => {
-//       if (url) {
-//         this.handleOpenURL({ url });
-//       }
-//     });
-//   };
-//
-//   componentWillUnmount() {
-//     // Remove event listener
-//     Linking.removeEventListener('url', this.handleOpenURL);
-//   };
-//
-//   handleOpenURL = ({ url }) => {
-//     // Extract stringified user string out of the URL
-//     const [, user_string] = url.match(/user=([^#]+)/);
-//     this.setState({
-//       // Decode the user string and parse it into JSON
-//       user: JSON.parse(decodeURI(user_string))
-//     });
-//     if (Platform.OS === 'ios') {
-//       SafariView.dismiss();
-//     }
-//   };
-//
-//   // Handle Login with Facebook button tap
-//   loginWithFacebook = () => this.openURL('https://10.0.0.139:3000/auth/facebook');
-//
-//   // Handle Login with Google button tap
-//   loginWithGoogle = () => this.openURL('https://10.0.0.139:3000/connect/google/');
-//
-//
-//   // Open URL in a browser
-//   openURL = (url) => {
-//     // Use SafariView on iOS
-//     if (Platform.OS === 'ios') {
-//       SafariView.show({
-//         url: url,
-//         fromBottom: true,
-//       });
-//     }
-//     // Or Linking.openURL on Android
-//     else {
-//       Linking.openURL(url);
-//     }
-//   };
-//
-  // render() {
-  //   const { user } = this.state;
-  //   return (
-  //     <View style={styles.container}>
-  //       { user
-  //         ? // Show user info if already logged in
-  //           <View style={styles.content}>
-  //             <Text style={styles.header}>
-  //               Welcome {user.name}!
-  //             </Text>
-  //             <View style={styles.avatar}>
-//                 <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
-//               </View>
-//             </View>
-//           : // Show Please log in message if not
-//             <View style={styles.content}>
-//               <Text style={styles.header}>
-//                 Welcome Stranger!
-//               </Text>
-//               <View style={styles.avatar}>
-//                 <Icon name="user-circle" size={100} color="rgba(0,0,0,.09)" />
-//               </View>
-//               <Text style={styles.text}>
-//                 Please log in to continue {'\n'}
-//                 to the awesomness
-//               </Text>
-//             </View>
-//         }
-//         {/* Login buttons */}
-//         <View style={styles.buttons}>
-//           <Icon.Button
-//             name="facebook"
-//             backgroundColor="#3b5998"
-//             onPress={this.loginWithFacebook}
-//             {...iconStyles}
-//           >
-//             Login with Facebook
-//           </Icon.Button>
-//           <Icon.Button
-//             name="google"
-//             backgroundColor="#DD4B39"
-//             onPress={this.loginWithGoogle}
-//             {...iconStyles}
-//           >
-//             Or with Google
-//           </Icon.Button>
-//         </View>
-//       </View>
-//     );
-//   }
-// }
-//
-const iconStyles = {
-  borderRadius: 10,
-  iconStyle: { paddingVertical: 5 },
-};
+            </Form>
+            )}
+        </Container>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
+    justifyContent: 'center',
   },
-  content: {
+  textRegister: {
+    color: "grey",
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    marginLeft: 5,
+    justifyContent: 'center',
+
+},
+inline: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+ loginButton: {
+    marginTop: 30,
+    margin: 20,
+    width: 150
+ },
+ button: {
+    marginTop: 10,
+    margin: 20,
+ },
+ button_google: {
+    marginTop: 10,
+    margin: 20,
+    backgroundColor: '#F44A4B'
+ },
+ content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatar: {
     margin: 20,
+    
   },
   avatarImage: {
     borderRadius: 50,
     height: 100,
     width: 100,
+    justifyContent: 'center',
+    marginTop: 50,
+    marginLeft: 90
   },
   header: {
     fontSize: 20,
@@ -230,11 +324,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
     marginBottom: 5,
-  },
-  buttons: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    margin: 20,
-    marginBottom: 30,
   },
 });
