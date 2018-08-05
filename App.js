@@ -9,15 +9,11 @@ import {
 } from 'react-native';
 
 import Expo from 'expo';
-
 import * as firebase from 'firebase';
-
-// import { GoogleSignin, GoogleSigninButton } from 'react-native-google-signin';
 
 
 //initialize Firebase
 const firebaseConfig = {
-
     apiKey: "AIzaSyBwCZk-JT3oG-HwZs6_4AIm6KTJ37TR61A",
     authDomain: "csca-test.firebaseapp.com",
     databaseURL: "https://csca-test.firebaseio.com",
@@ -33,12 +29,6 @@ Component {
 //constructor 
   constructor(props){
     super(props)
-
-    //these are the variables for login
-    // this.state = ({
-    //     email: '',
-    //     password: ''
-    // })
     this.state = ({
         signedIn: false,
         user_data: undefined,
@@ -61,8 +51,8 @@ signUpUsers = (email, password) => {
     }
   } 
 
-  loginUser = (email, password) => {
-      try {
+loginUser = (email, password) => {
+    try {
         firebase.auth().signInWithEmailAndPassword(email,password).then(
             jsonResponse => {
                 this.setState({
@@ -74,11 +64,11 @@ signUpUsers = (email, password) => {
           console.log(error.toString())
       }
   }
+
 async loginWithFacebook(){
     const {type, token} = await Expo.Facebook.logInWithReadPermissionsAsync
     ('649369955436717', { permissions: ['public_profile', 'email', ]})
-
-    if(type == 'success'){
+    if(type == 'success') {
         const credential = firebase.auth.FacebookAuthProvider.credential(token)
         firebase.auth().signInAndRetrieveDataWithCredential(credential)
         .then((user) =>{    
@@ -98,27 +88,27 @@ async loginWithFacebook(){
 loginWithGoogle = async () => {
     try {
         const result = await Expo.Google.logInAsync({
-        androidClientId:
-            "767329949917-foc66elv192e7a5evih0cullemcvt95p.apps.googleusercontent.com",
-        iosClientId: "767329949917-0o2p19n5ig4nnrlkc922rf5gpqmbv0es.apps.googleusercontent.com",
-        scopes: ["profile", "email"]
+            androidClientId:"767329949917-foc66elv192e7a5evih0cullemcvt95p.apps.googleusercontent.com",
+            iosClientId: "767329949917-0o2p19n5ig4nnrlkc922rf5gpqmbv0es.apps.googleusercontent.com",
+            scopes: ["profile", "email"]
         })
-
         if (result.type === "success") {
             var temp_data = { email: result.email,
                               name: result.user.name,
                               photoURL: result.user.photoUrl
                               };
             this.setState({
+                signedIn: true,
                 user_data: temp_data
         })
-        console.log(result)
+            console.log(result)
         } else {
-        console.log("cancelled")
+            console.log("cancelled")
         }
-    } catch (e) {
-        console.log("error", e)
-    }
+    } 
+    catch (e) {
+            console.log("error", e)
+        }
 }
 
 componentDidMount(){
@@ -151,11 +141,8 @@ this.setState({user_data: undefined, isValid: false});
 
   render() {
     const { user_data } = this.state;
-    const {isValid} = this.state;
-    console.log(isValid);
-
+    const { isValid } = this.state;
     return (
-        
         <Container style={styles.container}>
         <Text style={styles.header}>
                 Welcome to Nepal Sahitya {"\n"}
@@ -167,24 +154,20 @@ this.setState({user_data: undefined, isValid: false});
               </Text>
                   <View>
                     {user_data.photoURL ? (
-                        <Image source={{ uri: user_data.photoURL }} style={styles.avatarImage} />
-                        
+                        <Image source={{ uri: user_data.photoURL }} style={styles.avatarImage} />  
                     ) : (
                         <Text>{user_data.displayName}</Text>
                     )}
                     </View>    
-
-              
             <Button style={styles.button}
                 full
                 rounded
                 Primary 
                 onPress={()=> this.signOutUser()}
             >
-                <Text style={{color: 'white'}}>Logout, Go home kid!!  </Text>
+            <Text style={{color: 'white'}}>Logout, Go home kid!!  </Text>
             </Button>
             </View>
-
         )
         :
             (
@@ -251,13 +234,6 @@ this.setState({user_data: undefined, isValid: false});
                 >
                     <Text style={{color: 'white'}}>Login With Google  </Text>
                 </Button>
-                {/* <GoogleSigninButton
-                    style={{ width: 48, height: 48 }}
-                    size={GoogleSigninButton.Size.Icon}
-                    color={GoogleSigninButton.Color.Dark}
-                    onPress={this._signIn}/>
-                 */}
-
             </Form>
             )}
         </Container>
