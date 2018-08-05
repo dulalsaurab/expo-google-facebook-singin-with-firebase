@@ -1,1 +1,1 @@
-![Demo](https://youtu.be/oRdxUFDoQe0?list=PLK9Sc5q_4K6aNajVLKtkaAB1JGmKyccf2)
+![Demo](https://github.com/dulalsaurab/expo-google-facebook-singin-with-firebase/blob/master/assets/react-expo-facebook-google.gif)
