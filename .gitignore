@@ -1,7 +1,8 @@
 # dependencies
 /node_modules
 /.expo/
-
+/android
+/ios
 # testing
 /coverage
 
@@ -9,8 +10,6 @@
 /build
 
 config.js
-/ios
-/android
 
 # misc
 .DS_Store
