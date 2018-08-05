@@ -7,22 +7,13 @@ import {
   Text,
   View
 } from 'react-native';
+import { Container, Content, Header, Form, Input, Item, Button, Label } from 'native-base'
 
 import Expo from 'expo';
 import * as firebase from 'firebase';
+import clientId, {fireBaseConfig} from './config.js'
 
-
-//initialize Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyBwCZk-JT3oG-HwZs6_4AIm6KTJ37TR61A",
-    authDomain: "csca-test.firebaseapp.com",
-    databaseURL: "https://csca-test.firebaseio.com",
-    projectId: "csca-test",
-    storageBucket: "",
-};
-firebase.initializeApp(firebaseConfig);
-
-import { Container, Content, Header, Form, Input, Item, Button, Label } from 'native-base'
+firebase.initializeApp(fireBaseConfig);
 
 export default class App extends React.
 Component {
@@ -88,8 +79,8 @@ async loginWithFacebook(){
 loginWithGoogle = async () => {
     try {
         const result = await Expo.Google.logInAsync({
-            androidClientId:"767329949917-foc66elv192e7a5evih0cullemcvt95p.apps.googleusercontent.com",
-            iosClientId: "767329949917-0o2p19n5ig4nnrlkc922rf5gpqmbv0es.apps.googleusercontent.com",
+            androidClientId: clientId.androidClientId,
+            iosClientId: clientId.iosClientId,
             scopes: ["profile", "email"]
         })
         if (result.type === "success") {

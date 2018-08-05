@@ -8,6 +8,10 @@
 # production
 /build
 
+config.js
+ios/
+android/
+
 # misc
 .DS_Store
 .env.local
